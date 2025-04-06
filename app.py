@@ -1,49 +1,40 @@
 import streamlit as st
-import base64
 from PIL import Image
-import io
-import vision_trainer  # OCR + Predictor module
+import numpy as np
+import pytesseract
+import re
+from tensorflow.keras.models import load_model
 
-st.title("Aviator AI Predictor via Camera Snapshot")
+# Load trained model
+model = load_model("your_model.h5")  # Replace with your actual model file
 
-st.markdown("### Step 1: Allow camera access and take snapshot below")
+st.title("Aviator AI Predictor")
+st.markdown("Upload screenshot and get next round multiplier prediction")
 
-# HTML + JS to access webcam
-camera_html = """
-    <div>
-        <video id="video" width="100%" autoplay></video><br>
-        <button id="snap">Capture</button>
-        <canvas id="canvas" style="display:none;"></canvas>
-        <script>
-            const video = document.getElementById('video');
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(stream => video.srcObject = stream);
+uploaded_file = st.file_uploader("Upload Screenshot", type=["png", "jpg", "jpeg"])
 
-            const canvas = document.getElementById('canvas');
-            const snap = document.getElementById('snap');
+if uploaded_file:
+    image = Image.open(uploaded_file)
+    st.image(image, caption="Uploaded Screenshot", use_column_width=True)
 
-            snap.addEventListener('click', () => {
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                canvas.getContext('2d').drawImage(video, 0, 0);
-                const image = canvas.toDataURL('image/png');
-                window.parent.postMessage({ image: image }, '*');
-            });
-        </script>
-    </div>
-"""
+    # OCR
+    text = pytesseract.image_to_string(image)
+    st.markdown("**Extracted Text:**")
+    st.code(text)
 
-st.components.v1.html(camera_html, height=300)
+    # Extract multipliers
+    matches = re.findall(r'\d+\.\d+', text)
+    multipliers = [float(m) for m in matches if float(m) < 100]
 
-# Capture image from frontend (via JS event)
-image_data = st.experimental_get_query_params().get("image")
-if image_data:
-    st.image(image_data[0], caption="Captured Frame")
-    image_bytes = base64.b64decode(image_data[0].split(",")[1])
-    image = Image.open(io.BytesIO(image_bytes))
+    if len(multipliers) < 10:
+        st.warning("Need at least 10 multipliers for prediction. Found: " + str(len(multipliers)))
+    else:
+        input_data = np.array(multipliers[-10:]).reshape(1, 10, 1)
+        prediction = model.predict(input_data)
+        predicted_value = round(prediction[0][0], 2)
+        
+        confidence = round(float(abs(predicted_value - np.mean(multipliers)) / np.std(multipliers)) * 100, 2)
+        confidence = min(confidence, 99.9)  # Limit max confidence to 99.9%
 
-    st.markdown("### Step 2: AI Prediction")
-
-    with st.spinner("Analyzing..."):
-        result = vision_trainer.predict_from_image(image)
-        st.success(f"Predicted Multiplier: {result}")
+        st.success(f"Predicted Next Multiplier: **{predicted_value}x**")
+        st.info(f"Confidence Level: **{confidence}%**")
