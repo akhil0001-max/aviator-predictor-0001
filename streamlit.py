@@ -1,71 +1,71 @@
-
-import numpy as np
+import streamlit as st
+import pytesseract
 import pandas as pd
-import time
+import numpy as np
+from PIL import Image
+import io
+import re
+import matplotlib.pyplot as plt
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense
-import matplotlib.pyplot as plt
-from PIL import Image
-import pytesseract
-import re
+from sklearn.preprocessing import MinMaxScaler
 
-# Function to create dataset
-def create_dataset(series, seq_length):
-    X, y = [], []
-    for i in range(len(series) - seq_length):
-        X.append(series[i:i + seq_length])
-        y.append(series[i + seq_length])
-    return np.array(X), np.array(y)
+st.set_page_config(page_title="Aviator Predictor", layout="centered")
+st.title("Aviator Multiplier Predictor (AI-Powered)")
 
-# Upload initial CSV or input list
-print("Please upload CSV file with multiplier values (1 column, no header)")
-uploaded = files.upload()
-file_name = next(iter(uploaded))
-data = pd.read_csv(file_name, header=None).iloc[:,0].tolist()
+# File uploader
+uploaded_file = st.file_uploader("Upload Screenshot", type=["png", "jpg", "jpeg"])
 
-# Prepare dataset
-seq_len = 10
-X, y = create_dataset(data, seq_len)
-X = X.reshape((X.shape[0], X.shape[1], 1))
+if uploaded_file is not None:
+    image = Image.open(uploaded_file)
+    st.image(image, caption='Uploaded Screenshot', use_column_width=True)
 
-# Build model
-model = Sequential([
-    LSTM(64, input_shape=(seq_len, 1)),
-    Dense(1)
-])
-model.compile(optimizer='adam', loss='mse')
-model.fit(X, y, epochs=20, verbose=1)
+    # OCR to extract numbers
+    text = pytesseract.image_to_string(image)
+    matches = re.findall(r'\d+\.\d+', text)
+    multipliers = [float(match) for match in matches if float(match) < 100]
 
-# Predict next 10
-input_seq = np.array(data[-seq_len:]).reshape(1, seq_len, 1)
-predictions = []
-for _ in range(10):
-    pred = model.predict(input_seq, verbose=0)[0][0]
-    predictions.append(round(pred, 2))
-    input_seq = np.append(input_seq[:,1:,:], [[[pred]]], axis=1)
-
-# Real-time feedback loop
-for pred in predictions:
-    print(f"Prediction: {pred}")
-    feedback = input("Kya prediction sahi tha? (yes/no): ").strip().lower()
-
-    if feedback == 'no':
-        method = input("Screenshot se lena hai? (y/n): ").strip().lower()
-        if method == 'y':
-            uploaded = files.upload()
-            img = Image.open(next(iter(uploaded)))
-            text = pytesseract.image_to_string(img)
-            found = re.findall(r"\d+\.\d+x", text)
-            if found:
-                actual = float(found[0][:-1])
-            else:
-                actual = float(input("OCR fail. Manually daalo: "))
-        else:
-            actual = float(input("Actual value: "))
+    if len(multipliers) >= 20:
+        st.success(f"✅ {len(multipliers)} multipliers detected")
         
-        data.append(actual)
-        X, y = create_dataset(data, seq_len)
-        X = X.reshape((X.shape[0], X.shape[1], 1))
-        model.fit(X, y, epochs=10, verbose=0)
-    
-    time.sleep(3)
+        # Plot chart
+        st.subheader("Last 20 Multiplier Chart")
+        plt.plot(multipliers[-20:], marker='o')
+        plt.xlabel("Bet Index")
+        plt.ylabel("Multiplier")
+        st.pyplot(plt)
+
+        # Prepare data
+        scaler = MinMaxScaler()
+        data = scaler.fit_transform(np.array(multipliers).reshape(-1, 1))
+
+        X, y = [], []
+        for i in range(5, len(data)):
+            X.append(data[i-5:i])
+            y.append(data[i])
+        X, y = np.array(X), np.array(y)
+
+        # LSTM model
+        model = Sequential([
+            LSTM(64, input_shape=(X.shape[1], 1)),
+            Dense(1)
+        ])
+        model.compile(optimizer='adam', loss='mse')
+        model.fit(X, y, epochs=30, verbose=0)
+
+        # Predict next 10
+        predictions = []
+        input_seq = data[-5:]
+        for _ in range(10):
+            pred = model.predict(input_seq.reshape(1, 5, 1), verbose=0)
+            predictions.append(scaler.inverse_transform(pred)[0][0])
+            input_seq = np.append(input_seq[1:], pred, axis=0)
+
+        # Show predictions
+        st.subheader("Predicted Next 10 Multipliers")
+        for i, val in enumerate(predictions, 1):
+            st.write(f"🔮 Bet {i}: {val:.2f}x")
+    else:
+        st.warning("At least 20 multipliers needed for prediction.")
+else:
+    st.info("Please upload a screenshot of Aviator history (showing multipliers).")
