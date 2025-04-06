@@ -8,7 +8,6 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import pytesseract
 import re
-from google.colab import files
 
 # Function to create dataset
 def create_dataset(series, seq_length):
