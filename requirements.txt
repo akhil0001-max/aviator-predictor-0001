@@ -1,9 +1,5 @@
 streamlit
-easyocr
-pillow
-tensorflow
-scikit-learn
-matplotlib
-numpy
 pytesseract
-opencv-python
+pillow
+numpy
+tensorflow
