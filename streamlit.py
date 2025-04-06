@@ -1,9 +1,7 @@
 import streamlit as st
-import pytesseract
-import pandas as pd
+import easyocr
 import numpy as np
 from PIL import Image
-import io
 import re
 import matplotlib.pyplot as plt
 from tensorflow.keras.models import Sequential
@@ -13,15 +11,16 @@ from sklearn.preprocessing import MinMaxScaler
 st.set_page_config(page_title="Aviator Predictor", layout="centered")
 st.title("Aviator Multiplier Predictor (AI-Powered)")
 
-# File uploader
 uploaded_file = st.file_uploader("Upload Screenshot", type=["png", "jpg", "jpeg"])
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
     st.image(image, caption='Uploaded Screenshot', use_column_width=True)
 
-    # OCR to extract numbers
-    text = pytesseract.image_to_string(image)
+    # OCR with EasyOCR
+    reader = easyocr.Reader(['en'])
+    result = reader.readtext(np.array(image))
+    text = " ".join([res[1] for res in result])
     matches = re.findall(r'\d+\.\d+', text)
     multipliers = [float(match) for match in matches if float(match) < 100]
 
