@@ -1,7 +1,7 @@
 streamlit
-tensorflow
+easyocr
 pillow
-pytesseract
+tensorflow
 scikit-learn
 matplotlib
-pandas
+numpy
