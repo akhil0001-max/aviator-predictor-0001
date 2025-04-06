@@ -1,3 +1,9 @@
+st.title("Aviator AI Predictor")
+st.markdown("### Welcome to AI-Powered Prediction")
+
+if st.button("Start AI Training with Camera"):
+    st.warning("Camera training started. A new window will open.")
+    vision_trainer.start_camera_training()
 import streamlit as st
 import vision_trainer
 import easyocr
