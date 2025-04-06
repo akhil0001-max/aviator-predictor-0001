@@ -1,12 +1,14 @@
 import streamlit as st
-st.title("Aviator AI Predictor")
-st.markdown("### Welcome to AI-Powered Prediction")
-
-if st.button("Start AI Training with Camera"):
-    st.warning("Camera training started. A new window will open.")
-    vision_trainer.start_camera_training()
-
 import vision_trainer
+
+st.set_page_config(page_title="Aviator AI Predictor", layout="centered")
+st.title("Aviator AI Predictor")
+
+st.markdown("### Live Training Mode via Camera")
+
+if st.button("Start Camera Training"):
+    st.warning("Camera window will open (works only in local machine). Press 'q' to stop.")
+    vision_trainer.start_camera_training()
 import easyocr
 import numpy as np
 from PIL import Image
