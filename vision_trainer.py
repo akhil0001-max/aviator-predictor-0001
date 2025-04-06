@@ -1,30 +1,23 @@
-import cv2
+from PIL import Image
 import pytesseract
+import re
+import numpy as np
+from tensorflow.keras.models import load_model
 
-# (Windows ke liye yeh path set karna padta hai, agar error aaye to uncomment kar lena)
-# pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+model = load_model("your_model.h5")  # Pre-trained LSTM or other model
 
-def start_camera_training():
-    cap = cv2.VideoCapture(0)
-    print("Training started... Press 'q' to quit")
+def predict_from_image(image: Image.Image) -> str:
+    gray_image = image.convert("L")
+    text = pytesseract.image_to_string(gray_image)
+    print("Extracted:", text)
 
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
+    # Extract multipliers from OCR text
+    multipliers = re.findall(r"\d+\.\d+", text)
+    data = [float(m) for m in multipliers if float(m) < 100]
 
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        text = pytesseract.image_to_string(gray)
-        print("Detected:", text)
+    if len(data) < 10:
+        return "Insufficient data"
 
-        cv2.imshow("Camera Feed", frame)
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-    cap.release()
-    cv2.destroyAllWindows()
-
-    print("\n[INFO] Collected multipliers:")
-    for t, m in multiplier_history:
-        print(f"{t} - {m}x")
+    input_data = np.array(data[-10:]).reshape(1, 10, 1)
+    prediction = model.predict(input_data)
+    return str(round(prediction[0][0], 2))
