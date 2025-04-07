@@ -57,7 +57,7 @@ st.markdown("""
         font-size: 0.85em;
         color: #888;
     }
-    </style>
+    
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="main-title">AI Aviator Predictor</div>', unsafe_allow_html=True)
@@ -124,7 +124,7 @@ import streamlit as st
 st.markdown("<h2 style='text-align:center;'>Meet My Animated Robot</h2>", unsafe_allow_html=True)
 
 robot_html = """
-<style>
+
 # Neon animated background
 neon_css = """
 
@@ -256,7 +256,7 @@ st.markdown(neon_css, unsafe_allow_html=True)
 st.markdown(robot_html, unsafe_allow_html=True)
 # Speech bubble and input box
 chat_css = """
-<style>
+
 .speech-bubble {
   position: relative;
   background: #00aaff;
