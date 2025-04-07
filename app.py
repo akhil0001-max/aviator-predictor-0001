@@ -217,3 +217,48 @@ robot_html = """
 """
 
 st.markdown(robot_html, unsafe_allow_html=True)
+# Speech bubble and input box
+chat_css = """
+<style>
+.speech-bubble {
+  position: relative;
+  background: #00aaff;
+  color: white;
+  padding: 12px 18px;
+  border-radius: 10px;
+  width: fit-content;
+  max-width: 70%;
+  margin: 20px auto;
+  text-align: center;
+  font-weight: bold;
+  font-family: Arial;
+}
+.speech-bubble:after {
+  content: '';
+  position: absolute;
+  bottom: -15px;
+  left: 50%;
+  margin-left: -10px;
+  border-width: 10px 10px 0;
+  border-style: solid;
+  border-color: #00aaff transparent;
+  display: block;
+  width: 0;
+}
+</style>
+"""
+
+st.markdown(chat_css, unsafe_allow_html=True)
+
+# Default robot message
+default_message = st.session_state.get("robot_msg", "Hi! I'm your assistant robot.")
+
+st.markdown(f"<div class='speech-bubble'>{default_message}</div>", unsafe_allow_html=True)
+
+# User input
+user_input = st.text_input("Say something to the robot:", "")
+
+if user_input:
+    reply = f"You said: {user_input}"
+    st.session_state.robot_msg = reply
+    st.experimental_rerun()
