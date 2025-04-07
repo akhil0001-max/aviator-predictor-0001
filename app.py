@@ -125,6 +125,43 @@ st.markdown("<h2 style='text-align:center;'>Meet My Animated Robot</h2>", unsafe
 
 robot_html = """
 <style>
+# Neon animated background
+neon_css = """
+
+body {
+  background: black;
+  overflow-x: hidden;
+}
+.neon-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(circle at 50% 50%, #00ffff22, #000000 70%);
+  animation: pulse 5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    background: radial-gradient(circle at 50% 50%, #00ffff33, #000000 70%);
+  }
+  50% {
+    background: radial-gradient(circle at 50% 50%, #ff00ff33, #000000 70%);
+  }
+  100% {
+    background: radial-gradient(circle at 50% 50%, #00ffff33, #000000 70%);
+  }
+}
+
+.stApp {
+  background-color: transparent !important;
+}
+
+<div class="neon-bg"></div>
+"""
+st.markdown(neon_css, unsafe_allow_html=True)
 .robot {
   position: relative;
   width: 120px;
@@ -195,7 +232,7 @@ robot_html = """
   0% { transform: translateY(0); }
   100% { transform: translateY(-10px); }
 }
-</style>
+
 
 <div class="robot">
   <div class="head">
