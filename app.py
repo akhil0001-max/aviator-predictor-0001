@@ -119,3 +119,101 @@ else:
     st.markdown('<div class="upload-button">Upload a screenshot to begin prediction</div>', unsafe_allow_html=True)
 
 st.markdown('<div class="footer">Made with Love by Akhil • AI Powered • 2025</div>', unsafe_allow_html=True)
+import streamlit as st
+
+st.markdown("<h2 style='text-align:center;'>Meet My Animated Robot</h2>", unsafe_allow_html=True)
+
+robot_html = """
+<style>
+.robot {
+  position: relative;
+  width: 120px;
+  margin: 40px auto;
+  animation: float 2s ease-in-out infinite alternate;
+}
+.head {
+  width: 100px;
+  height: 80px;
+  background: #555;
+  border-radius: 20px;
+  position: relative;
+  margin: 0 auto;
+}
+.eyes {
+  position: absolute;
+  top: 25px;
+  left: 20px;
+  width: 60px;
+  display: flex;
+  justify-content: space-between;
+}
+.eye {
+  width: 15px;
+  height: 15px;
+  background: #0ff;
+  border-radius: 50%;
+  box-shadow: 0 0 5px #0ff;
+  animation: blink 3s infinite;
+}
+.body {
+  width: 80px;
+  height: 100px;
+  background: #777;
+  margin: 10px auto;
+  border-radius: 10px;
+}
+.arms .arm {
+  width: 20px;
+  height: 80px;
+  background: #666;
+  position: absolute;
+  top: 90px;
+}
+.arm.left {
+  left: -30px;
+}
+.arm.right {
+  right: -30px;
+}
+.legs {
+  display: flex;
+  justify-content: space-between;
+  width: 80px;
+  margin: 10px auto 0;
+}
+.leg {
+  width: 15px;
+  height: 50px;
+  background: #444;
+  border-radius: 5px;
+}
+@keyframes blink {
+  0%, 90%, 100% { opacity: 1; }
+  95% { opacity: 0; }
+}
+@keyframes float {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-10px); }
+}
+</style>
+
+<div class="robot">
+  <div class="head">
+    <div class="eyes">
+      <div class="eye left"></div>
+      <div class="eye right"></div>
+    </div>
+  </div>
+  <div class="body"></div>
+  <div class="arms">
+    <div class="arm left"></div>
+    <div class="arm right"></div>
+  </div>
+  <div class="legs">
+    <div class="leg left"></div>
+    <div class="leg right"></div>
+  </div>
+</div>
+"""
+
+st.markdown(robot_html, unsafe_allow_html=True)
